@@ -45,5 +45,8 @@
       "no-mixed-operators": 0,
       "arrow-parens": 0
     }
+  },
+  "dependencies": {
+    "dotenv": "^4.0.0"
   }
 }
