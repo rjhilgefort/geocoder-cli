@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 
-const always = x => x;
-
-// eslint-disable-next-line no-console
-const { log } = console;
+const { log, always } = require('./lib');
+// const geocodeFile = require('./geocode-file');
 
 log(always('hello world'));

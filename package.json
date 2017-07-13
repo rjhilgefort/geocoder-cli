@@ -14,16 +14,26 @@
   "license": "ISC",
   "scripts": {
     "start": "npm run lint && node app",
-    "lint": "eslint --ext .js ./src"
+    "test": "jest --watch -o --verbose",
+    "lint": "eslint --ext .js ./src",
+    "lint-fix": "eslint --ext .js ./src --fix"
   },
   "devDependencies": {
     "eslint": "^3.19.0",
     "eslint-config-airbnb": "^15.0.0",
-    "eslint-plugin-import": "^2.7.0"
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-jest": "^20.0.3",
+    "jest": "^20.0.4"
   },
   "eslintConfig": {
+    "env": {
+      "jest": true
+    },
     "extends": [
       "airbnb-base"
+    ],
+    "plugins": [
+      "jest"
     ],
     "rules": {
       "no-unused-vars": 1,
@@ -32,7 +42,8 @@
         "never"
       ],
       "no-underscore-dangle": 0,
-      "no-mixed-operators": 0
+      "no-mixed-operators": 0,
+      "arrow-parens": 0
     }
   }
 }
