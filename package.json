@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "geocoder-cli",
   "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "keywords": [
     "geocode",
     "geocoder",
@@ -14,5 +11,28 @@
     "cli"
   ],
   "author": "rjhilgefort@gmail.com",
-  "license": "ISC"
+  "license": "ISC",
+  "scripts": {
+    "start": "npm run lint && node app",
+    "lint": "eslint --ext .js ./src"
+  },
+  "devDependencies": {
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb": "^15.0.0",
+    "eslint-plugin-import": "^2.7.0"
+  },
+  "eslintConfig": {
+    "extends": [
+      "airbnb-base"
+    ],
+    "rules": {
+      "no-unused-vars": 1,
+      "comma-dangle": [
+        "error",
+        "never"
+      ],
+      "no-underscore-dangle": 0,
+      "no-mixed-operators": 0
+    }
+  }
 }
