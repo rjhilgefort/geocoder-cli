@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 
 require('dotenv').config();
-const { log } = require('./lib');
+const { log, pipe } = require('./lib');
 const geocodeFile = require('./geocode-file');
 
-// TODO: Use `commander` or something to easier facilitate file from CLI
-const result = geocodeFile(process.env.API_KEY)('../data/addresses.csv');
+// TODO: Use `commander` or something to easier facilitate `DATA_FILE` from CLI
+const { API_KEY, DATA_FILE } = process.env;
 
-log(result);
+pipe(
+  geocodeFile(API_KEY),
+  log
+)(DATA_FILE);

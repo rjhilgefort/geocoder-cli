@@ -1,8 +1,9 @@
 /* eslint-disable global-require */
 
 module.exports = {
-  always: require('./always'),
+  identity: require('./identity'),
   isArray: require('./is-array'),
   isObject: require('./is-object'),
-  log: require('./log')
+  log: require('./log'),
+  pipe: require('./pipe')
 };

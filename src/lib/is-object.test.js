@@ -1,4 +1,4 @@
-const isObject = require('./is-object.js');
+const isObject = require('./is-object');
 
 describe('isObject', () => {
   test('true for objects', () => {

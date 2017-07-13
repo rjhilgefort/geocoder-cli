@@ -1,9 +1,9 @@
-const always = require('./always.js');
+const identity = require('./identity.js');
 
-describe('always', () => {
+describe('identity', () => {
   test('returns passed in value', () => {
     const harness = (x) => {
-      expect(always(x)).toEqual(x);
+      expect(identity(x)).toEqual(x);
     };
     harness({ foo: 'foo' });
     harness(['foo', 'bar']);
