@@ -1,73 +1,51 @@
 const readline = require('readline');
 const fs = require('fs');
 const path = require('path');
-const https = require('https');
-const {
-  info, error, pipe, append, prepend, replace
-} = require('./utils');
+const { info, error } = require('./utils');
+const { geocodeLine } = require('./lib');
 
-// NOTE: Assumes that all addresses are wrapped in quotes
-// sanitizeAddress :: String -> String
-const sanitizeAddress = data => data.trim().slice(1, -1);
-
-// buildRequestPath :: String => String -> String
-const buildRequestPath = token => data =>
-  pipe(
-    replace(/ /g)('+'),
-    prepend('/maps/api/geocode/json?address='),
-    append(`&key=${token}`),
-  )(data);
-
-// buildRequestOptions :: String -> Object
-const buildRequestOptions = data => ({
-  host: 'maps.googleapis.com',
-  path: data
-});
-
-// callWithParsedResponse :: Function => Stream -> a(b)
-const callWithParsedResponse = func => response => {
-  response.setEncoding('utf8');
-
-  let body = '';
-  response.on('data', (data) => { body += data; });
-
-  // TODO: Handle malformed JSON
-  response.on('end', () => func(JSON.parse(body)));
-};
-
-const handleGeocode = data => {
-  info(data);
-  return data;
-};
-
-// geocodeFile :: String => String -> STDOUT
-const geocodeFile = token => file => {
+// geocodeFile :: String -> STDOUT
+const geocodeFile = file => cb => {
+  // TODO: Would be great to have better control mechanisms via
+  //       lazy streams and/or promises.
+  let isEOF = false;
   let lineNumber = 0;
+  let lastReadLine = 0;
+  let lastGeocodedLine = 0;
+
   const processLine = line => {
     lineNumber += 1;
+    info(line);
     if (lineNumber === 1) {
       return error(`Skipping CSV Header: ${line}`);
     }
 
-    const options = pipe(
-      sanitizeAddress,
-      buildRequestPath(token),
-      buildRequestOptions,
-    )(line);
+    geocodeLine(line)((err, res) => {
+      if (err) return error(err);
+      info(res);
+      lastGeocodedLine += 1;
 
-    info(options);
+      info(lastGeocodedLine);
+      info(lastReadLine);
+      info(isEOF);
+      // If we've processed all the lines read, and
+      // there are no more lines to process, then we're done
+      if ((lastGeocodedLine === lastReadLine) && isEOF) {
+        return cb();
+      }
 
-    https.request(options, callWithParsedResponse(handleGeocode))
-      .on('error', error)
-      .end();
+      return res;
+    });
 
-    return null;
+    lastReadLine += 1;
+    return line;
   };
 
   readline.createInterface({
     input: fs.createReadStream(path.join(__dirname, file))
   })
-    .on('line', processLine);
+    .on('line', processLine)
+    .on('close', () => { isEOF = true; });
 };
 
 module.exports = geocodeFile;
