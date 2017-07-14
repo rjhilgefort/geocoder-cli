@@ -5,5 +5,10 @@ module.exports = {
   isArray: require('./is-array'),
   isObject: require('./is-object'),
   log: require('./log'),
-  pipe: require('./pipe')
+  info: require('./info'),
+  error: require('./error'),
+  pipe: require('./pipe'),
+  append: require('./append'),
+  prepend: require('./prepend'),
+  replace: require('./replace')
 };
