@@ -4,7 +4,7 @@ const path = require('path');
 const https = require('https');
 const {
   info, error, pipe, append, prepend, replace
-} = require('./lib');
+} = require('./utils');
 
 // NOTE: Assumes that all addresses are wrapped in quotes
 // sanitizeAddress :: String -> String
