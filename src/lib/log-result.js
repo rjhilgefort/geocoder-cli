@@ -7,15 +7,14 @@ const logResult = subject => (err, res) => {
   // Only show error results for non-prod
   if ((parseInt(LOG_LEVEL, 10) === 0) && !res) return null;
 
-  const seperator = '--------------------------------------------------';
-  log(`\n${seperator}`);
+  const seperator = '-----------------------------------------------------';
+  log(`${seperator}`);
   info(subject);
   if (err) {
     error(err);
   } else {
     info(res);
   }
-  log(seperator);
 
   return null;
 };
