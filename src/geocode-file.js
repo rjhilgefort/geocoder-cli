@@ -1,51 +1,86 @@
-const readline = require('readline');
+const stream = require('stream');
 const fs = require('fs');
 const path = require('path');
-const { info, error } = require('./utils');
-const { geocodeLine } = require('./lib');
+const { append } = require('./utils');
+const { geocodeLine, logResult } = require('./lib');
 
-// geocodeFile :: String -> STDOUT
-const geocodeFile = file => cb => {
-  // TODO: Would be great to have better control mechanisms via
-  //       lazy streams and/or promises.
-  let isEOF = false;
-  let lineNumber = 0;
-  let lastReadLine = 0;
-  let lastGeocodedLine = 0;
+let buffer = '';
+const BufferStream = new stream.Transform({
+  transform(chunk, encoding, cb) {
+    // TODO: Would become too big on VLF given the limiter below
+    // Add latest chunk to buffer
+    buffer = append(chunk)(buffer);
 
-  const processLine = line => {
-    lineNumber += 1;
-    info(line);
-    if (lineNumber === 1) {
-      return error(`Skipping CSV Header: ${line}`);
-    }
-
-    geocodeLine(line)((err, res) => {
-      if (err) return error(err);
-      info(res);
-      lastGeocodedLine += 1;
-
-      info(lastGeocodedLine);
-      info(lastReadLine);
-      info(isEOF);
-      // If we've processed all the lines read, and
-      // there are no more lines to process, then we're done
-      if ((lastGeocodedLine === lastReadLine) && isEOF) {
+    const rateLimit = setInterval(() => {
+      // Stop checking for data when buffer is empty after check added
+      // TODO: Doesn't handle empty lines at EOF or any case where
+      //       stream doesn't end with `\n`
+      if (buffer.length === 0) {
+        clearInterval(rateLimit);
         return cb();
       }
 
-      return res;
-    });
+      // Look for a complete line to emit
+      const delimeterIndex = buffer.indexOf('\n');
 
-    lastReadLine += 1;
-    return line;
-  };
+      // Don't emit anything if a complete line cannot be found
+      if (delimeterIndex === -1) return null;
 
-  readline.createInterface({
-    input: fs.createReadStream(path.join(__dirname, file))
-  })
-    .on('line', processLine)
-    .on('close', () => { isEOF = true; });
-};
+      // Emit a complete line
+      this.push(buffer.slice(0, delimeterIndex));
+
+      // Slice emitted line off buffer
+      buffer = buffer.slice(delimeterIndex + 1);
+
+      return null;
+    }, 1000 / 50);
+  }
+});
+
+let lineNumber = 0;
+// TODO: Not doing anything with this yet, just dumping to console
+const rooftopQualityAddresses = [];
+const GeocodeStream = new stream.Transform({
+  transform(chunk, encoding, cb) {
+    const line = chunk.toString();
+    lineNumber += 1;
+
+    // Skipe the CSV header, but geocode all other lines
+    if (lineNumber === 1) {
+      logResult(line)('Skipping CSV Header');
+    } else {
+      geocodeLine(line)((err, res) => {
+        if (err) return logResult(line)(err);
+
+        // Only care about a single non-partial result
+        if (res.results.length !== 1) {
+          return logResult(line)('No geocode results for address');
+        }
+
+        const rooftopRes = res.results.find(
+          (addressRes) => addressRes.geometry.location_type === 'ROOFTOP'
+        );
+
+        if (!rooftopRes) {
+          return logResult(line)('No rooftop hits for address');
+        }
+
+        rooftopQualityAddresses.push({
+          line,
+          geocoding: rooftopRes
+        });
+        return logResult(line)(null, 'Rooftop quality address identified, pushed');
+      });
+    }
+
+    return cb();
+  }
+});
+
+// geocodeFile :: String -> STDOUT
+const geocodeFile = file =>
+  fs.createReadStream(path.join(__dirname, file))
+    .pipe(BufferStream)
+    .pipe(GeocodeStream);
 
 module.exports = geocodeFile;

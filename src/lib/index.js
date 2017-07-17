@@ -2,5 +2,6 @@
 
 module.exports = {
   request: require('./request'),
-  geocodeLine: require('./geocode-line')
+  geocodeLine: require('./geocode-line'),
+  logResult: require('./log-result')
 };
