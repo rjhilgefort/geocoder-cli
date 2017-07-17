@@ -2,6 +2,7 @@
 
 A CLI program that takes a data file containing addresses (CSV) and prints the results to the console (for now).
 
+![](output/output-short.png)
 
 ## Environment / Installation
 
