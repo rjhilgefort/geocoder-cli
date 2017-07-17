@@ -26,7 +26,7 @@ node app
 ## Notes
 
 - NOTE: I did end up using one dependency, `dotenv`, to make environment variables easier to deal with.
-- TODO: Need a lot more tests- ran out of time and had to abandon TDD on.
+- TODO: Need a lot more tests- ran out of time and had to abandon TDD.
 
 ## Roadmap / TODO
 - Write tests.
@@ -35,4 +35,3 @@ node app
 - Allow for the file to be passed in via cli.
 - Pass roottop results all the way back up to `geocodeFile`.
 - Break out the rate limiting logic from `line-stream` to it's own that acts on entire lines for finer control.
-
