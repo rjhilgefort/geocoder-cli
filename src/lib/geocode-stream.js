@@ -11,7 +11,7 @@ const geocodeStream = new stream.Transform({
     const line = chunk.toString();
     lineNumber += 1;
 
-    // Skipe the CSV header, but geocode all other lines
+    // Skip the CSV header, but geocode all other lines
     if (lineNumber === 1) {
       logResult(line)('Skipping CSV Header');
     } else {
@@ -31,6 +31,10 @@ const geocodeStream = new stream.Transform({
           return logResult(line)('No rooftop hits for address');
         }
 
+        // TODO: Not doing anything with this yet, just dumping to console.
+        //       Will need to modify this to just push rooftop quality chunk to following
+        //       stream and then implement another stream in `../geocode-file.js` that
+        //       collects them (like this) and then exposes a call back for the `index` caller
         rooftopQualityAddresses.push({
           line,
           geocoding: rooftopRes
